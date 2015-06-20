@@ -1,2 +1,2 @@
 # cuda
-cuda examples + my projects
+Monte Carlo simulations CPU vs CPU supported by GPU vs GPU
