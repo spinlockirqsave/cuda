@@ -64,7 +64,7 @@ int main() {
 		double t4 = double(clock()) / CLOCKS_PER_SEC;
 		double ticks = t4;
 		printf("Done.\n");
-		printf("Running CPU MonteCarlo using GPU-preallocated random variables...\n");
+		printf("Running CPU MonteCarlo using GPU-preallocated random variables...\n.");
 
 		// init variables for CPU Monte Carlo
 		vector<real> normals(N_NORMALS);
@@ -77,15 +77,16 @@ int main() {
 			size_t n_idx = i * N_STEPS;
 			s_curr = S0;
 			int n = 0;
-			do {
-				//s_curr = s_curr + mu*s_curr*dt + sigma*s_curr*normals[n_idx];
-				s_curr = s_curr * exp(MuByT + VBySqrtT *  normals[n_idx]);
-				n_idx++;
-				n++;
-			} while (n < N_STEPS);
+			//do {
+			//	//s_curr = s_curr + mu*s_curr*dt + sigma*s_curr*normals[n_idx];
+			//	s_curr = s_curr * exp(MuByT + VBySqrtT *  normals[n_idx]);
+			//	n_idx++;
+			//	n++;
+			//} while (n < N_STEPS);
+			s_curr = s_curr * exp((r - 0.5 * sigma * sigma) * T + sigma * sqrt(T) * normals[n_idx]);
 			double payoff = (s_curr > K ? s_curr - K : 0.0);
 			sum += exp(-r*T) * payoff;
-			if (((double)clock() / CLOCKS_PER_SEC - ticks) > 1)
+			if (((double)clock() / CLOCKS_PER_SEC - ticks) > 0.1)
 			{
 				printf(".");
 				ticks = (double)clock() / CLOCKS_PER_SEC;

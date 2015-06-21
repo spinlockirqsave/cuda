@@ -71,7 +71,8 @@ extern "C" void MonteCarloCPU(
 	TOptionValue    &callValue,
 	const TOptionData optionData,
 	const size_t pathN,
-	const int nsteps
+	const int nsteps,
+	int  thread_id
 	);
 
 //Black-Scholes formula for call options
@@ -150,7 +151,8 @@ DWORD WINAPI thread_f(LPVOID lpParam)
 		pData->optionValue,
 		pData->optionData,
 		pData->PATH_N,
-		pData->nsteps
+		pData->nsteps,
+		pData->thread_id
 	);
 	partial_outcomes[pData->thread_id].callExpected = pData->optionValue.callExpected;
 	partial_outcomes[pData->thread_id].putExpected = pData->optionValue.putExpected;
@@ -203,7 +205,7 @@ int main(int argc, char **argv)
 	float t;
 	double sumDelta, sumRef;
 
-	printf("main(): generating input data...\n");
+	printf("Generating input data...\n");
 	srand((unsigned)time(NULL));
 
 	for (int i = 0; i < OPT_N; i++)
@@ -231,9 +233,8 @@ int main(int argc, char **argv)
 
 #ifdef DO_CPU
 
-	printf("main(): running CPU MonteCarlo using [%d] threads...\n", MAX_THREADS);
+	printf("Running CPU MonteCarlo using [%d] threads...\n", MAX_THREADS);
 	printf("Number of options: [%d], \tpaths : [%llu], \tsteps: [%d]\n", OPT_N, (unsigned long long)PATH_N, nsteps);
-	printf("...\n");
 	sdkStartTimer(&hTimer[0]);
 	checkCudaErrors(cudaSetDevice(0));
 
@@ -326,7 +327,7 @@ int main(int argc, char **argv)
 		}
 		put_conf /= MAX_THREADS;
 
-		printf("[%d] Call expected : %f\t", i, call_expected);
+		printf("\n[%d] Call expected : %f\t", i, call_expected);
 		printf("Call confidence: %f\n", call_conf);
 		printf("[%d] Put expected : %f\t", i, put_expected);
 		printf("Put confidence: %f\n", put_conf);

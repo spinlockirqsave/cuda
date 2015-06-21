@@ -35,16 +35,17 @@ __global__ void mc_kernel(
 	const real dt = float(T) / float(N_STEPS);
 	if (s_idx < N_PATHS) {
 		int n = 0;
-		do {
-			//s_curr = s_curr + mu*s_curr*dt + sigma*s_curr*d_normals[n_idx];
-			//s_curr = s_curr * exp(MuByT + VBySqrtT * d_normals[n_idx]);
-			s_curr = s_curr * exp(mu*dt + V*sqrt(dt) * d_normals[n_idx]);
-			n_idx++;
-			n++;
-		} while (n < N_STEPS);
+		//do {
+		//	//s_curr = s_curr + mu*s_curr*dt + sigma*s_curr*d_normals[n_idx];
+		//	//s_curr = s_curr * exp(MuByT + VBySqrtT * d_normals[n_idx]);
+		//	s_curr = (s_curr * exp( mu*dt + V * sqrt(dt) * d_normals[n_idx]));
+		//	n_idx++;
+		//	n++;
+		//} while (n < N_STEPS);
+		s_curr = s_curr * exp((r - 0.5 * V * V) * T + V * sqrt(T) * d_normals[n_idx]);
 		//double payoff = 4.5230 * exp(r*T);
 		//s_curr = s_curr * exp(mu*T + V*sqrt(T) * d_normals[n_idx]);
-		real payoff = (s_curr > K ? s_curr - K : 0.0);
+		real payoff = ((s_curr > K) ? s_curr - K : 0.0);
 		//__syncthreads();
 		d_s[s_idx] = exp(-r*T) * payoff;
 	}

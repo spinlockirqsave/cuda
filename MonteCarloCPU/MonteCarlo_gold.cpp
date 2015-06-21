@@ -96,7 +96,8 @@ extern "C" void MonteCarloCPU(
 	TOptionValue    &optionValue,
 	const TOptionData optionData,
 	const size_t pathN,
-	const int nsteps
+	const int nsteps,
+	int  thread_id
 	)
 {
 	const double        T = optionData.T;
@@ -118,7 +119,8 @@ extern "C" void MonteCarloCPU(
 
 	double call_sum = 0, call_sum2 = 0, st, call_price;
 	double put_sum = 0, put_sum2 = 0, put_price;
-
+	double ticks = (double)clock() / CLOCKS_PER_SEC;
+	int count_dots = 0;
 	// generates pathN outcome prices
 	for (size_t pos = 0; pos < pathN; pos++)
 	{
@@ -126,11 +128,12 @@ extern "C" void MonteCarloCPU(
 		samples = (float *)malloc(nsteps * sizeof(float));
 		checkCudaErrors(curandGenerateNormal(gen, samples, nsteps, 0.0, 1.0));
 
-		for (int j = 0; j < nsteps; ++j)
-		{
-			double    sample = samples[j];
-			st = s_t(st, sample, MuByT, VBySqrtT);
-		}
+		//for (int j = 0; j < nsteps; ++j)
+		//{
+		//	double    sample = samples[j];
+		//	st = s_t(st, sample, MuByT, VBySqrtT);
+		//}
+		st = st * exp((R - 0.5 * V * V) * T + V * sqrt(T) * samples[0]);
 		call_price = (st - X > 0 ? st - X : 0);
 		put_price = (st - X < 0 ? X - st : 0);
 		call_sum += call_price;
@@ -138,6 +141,14 @@ extern "C" void MonteCarloCPU(
 		put_sum += put_price;
 		put_sum2 += put_price * put_price;
 		free(samples);
+		if (((double)clock() / CLOCKS_PER_SEC - ticks) > 0.3 && thread_id == 0)
+		{
+			ticks = (double)clock() / CLOCKS_PER_SEC;
+			if (++count_dots % 15 == 0)
+				printf("\n");
+			else
+				printf(".");
+		}
 	}
 	//Derive average from the total sum and discount by riskfree rate
 	optionValue.callExpected = (float)(exp(-R * T) * call_sum / (double)pathN);
