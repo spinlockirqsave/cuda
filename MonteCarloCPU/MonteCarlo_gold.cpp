@@ -96,18 +96,20 @@ extern "C" void MonteCarloCPU(
 	TOptionValue    &optionValue,
 	const TOptionData optionData,
 	const size_t pathN,
-	const int nsteps,
+	int nsteps,
 	int  thread_id
 	)
 {
+	// generrating MC we take advantage of the law of huge numbers
+	nsteps = 1;
 	const double        T = optionData.T;
-	const double		dt = T / nsteps;
+	//const double		dt = T / nsteps;
 	const double        S = optionData.S;
 	const double        X = optionData.X;
 	const double        R = optionData.R;
 	const double        V = optionData.V;
-	const double    MuByT = (R - 0.5 * V * V) * dt;
-	const double VBySqrtT = V * sqrt(dt);
+	//const double    MuByT = (R - 0.5 * V * V) * dt;
+	//const double VBySqrtT = V * sqrt(dt);
 
 	float *samples;
 	curandGenerator_t gen;
@@ -125,8 +127,9 @@ extern "C" void MonteCarloCPU(
 	for (size_t pos = 0; pos < pathN; pos++)
 	{
 		st = optionData.S;
-		samples = (float *)malloc(nsteps * sizeof(float));
-		checkCudaErrors(curandGenerateNormal(gen, samples, nsteps, 0.0, 1.0));
+		// curandGenerateNormal requires even number of variables to generate, let's give it 2 then
+		samples = (float *)malloc((nsteps + 1) * sizeof(float));
+		checkCudaErrors(curandGenerateNormal(gen, samples, (nsteps + 1), 0.0, 1.0));
 
 		//for (int j = 0; j < nsteps; ++j)
 		//{
@@ -144,7 +147,7 @@ extern "C" void MonteCarloCPU(
 		if (((double)clock() / CLOCKS_PER_SEC - ticks) > 0.3 && thread_id == 0)
 		{
 			ticks = (double)clock() / CLOCKS_PER_SEC;
-			if (++count_dots % 15 == 0)
+			if (++count_dots % 50 == 0)
 				printf("\n");
 			else
 				printf(".");

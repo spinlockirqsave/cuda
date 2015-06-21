@@ -71,7 +71,7 @@ extern "C" void MonteCarloCPU(
 	TOptionValue    &callValue,
 	const TOptionData optionData,
 	const size_t pathN,
-	const int nsteps,
+	int nsteps,
 	int  thread_id
 	);
 
@@ -169,11 +169,6 @@ int main(int argc, char **argv)
 	bool bqatest = false;
 	bool strongScaling = false;
 
-	pArgc = &argc;
-	pArgv = argv;
-
-	printf("%s Starting...\n\n", argv[0]);
-
 	//GPU number present in the system
 	int GPU_N;
 	checkCudaErrors(cudaGetDeviceCount(&GPU_N));
@@ -182,7 +177,7 @@ int main(int argc, char **argv)
 	int scale = (strongScaling) ? 1 : GPU_N;
 	int OPT_N = nOptions * scale;
 	size_t PATH_N = 7000000;
-	int nsteps = 140;
+	int nsteps = 1;
 
 	nOptions = adjustProblemSize(GPU_N, nOptions);
 
@@ -205,7 +200,7 @@ int main(int argc, char **argv)
 	float t;
 	double sumDelta, sumRef;
 
-	printf("Generating input data...\n");
+	printf("Generating input data...");
 	srand((unsigned)time(NULL));
 
 	for (int i = 0; i < OPT_N; i++)
@@ -230,11 +225,12 @@ int main(int argc, char **argv)
 		callValueGPU[i].putConfidence = -1.0f;
 #endif
 	}
+	printf("  done.\n");
 
 #ifdef DO_CPU
 
 	printf("Running CPU MonteCarlo using [%d] threads...\n", MAX_THREADS);
-	printf("Number of options: [%d], \tpaths : [%llu], \tsteps: [%d]\n", OPT_N, (unsigned long long)PATH_N, nsteps);
+	printf("Number of options: [%d], \tpaths : [%llu], \tsteps: [%d {law of huge numbers}]\n", OPT_N, (unsigned long long)PATH_N, 1);
 	sdkStartTimer(&hTimer[0]);
 	checkCudaErrors(cudaSetDevice(0));
 
@@ -327,15 +323,16 @@ int main(int argc, char **argv)
 		}
 		put_conf /= MAX_THREADS;
 
-		printf("\n[%d] Call expected : %f\t", i, call_expected);
-		printf("Call confidence: %f\n", call_conf);
-		printf("[%d] Put expected : %f\t", i, put_expected);
-		printf("Put confidence: %f\n", put_conf);
+		printf("\n[%d] Done.\n", i + 1);
+		printf("[%d] Call expected : %f\t", i + 1, call_expected);
+		printf("Call confidence width: %f [1 - alpha = 0.95]\n", call_conf);
+		printf("[%d] Put expected  : %f\t", i + 1, put_expected);
+		printf("Put confidence width : %f [1 - alpha = 0.95]\n", put_conf);
 		call_price_sum += call_expected;
 		put_price_sum += put_expected;
 	}
 	t = sdkGetTimerValue(&hTimer[0]);
-	printf("Done.\nAverage price : \tCall [%f], \tPut [%f]\n\n", call_price_sum / OPT_N, put_price_sum / OPT_N);
+	printf("All done.\nAverage price : \tCall [%f], \tPut [%f]\n\n", call_price_sum / OPT_N, put_price_sum / OPT_N);
 	printf("Total time (ms.): %f\n", t);
 	//printf("L1 norm: %E\n", sumDelta / sumRef);
 #endif
