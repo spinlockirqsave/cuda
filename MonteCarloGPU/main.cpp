@@ -75,11 +75,12 @@ int main(int argc, char **argv) {
 			dev_array<real> d_normals(N_NORMALS);
 
 			// generate random numbers
+			printf("Generating random variables...");
 			curandGenerator_t curandGenerator;
 			curandCreateGenerator(&curandGenerator, CURAND_RNG_PSEUDO_MTGP32);
 			curandSetPseudoRandomGeneratorSeed(curandGenerator, time(NULL));//1234ULL);
 			curandGenerateNormal(curandGenerator, (float*)d_normals.getData(), N_NORMALS, 0.0f, 1.0f); // n has to be even
-
+			printf(" done.\n");
 			printf("Number of options: [%d], \tpaths : [%llu], \tsteps: [%d {law of huge numbers}]\n", 1, (unsigned long long)N_PATHS, 1);
 			printf("Running GPU MonteCarlo...\n");
 			t2 = double(clock()) / CLOCKS_PER_SEC;
