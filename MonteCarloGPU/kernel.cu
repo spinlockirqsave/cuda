@@ -2,13 +2,12 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include "realtype.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <helper_cuda.h>
 #include <curand_kernel.h>
 #include "kernel.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 
 __global__ void mc_kernel(TOptionValue * d_s, real T, real K,
@@ -38,20 +37,10 @@ __global__ void mc_kernel(TOptionValue * d_s, real T, real K,
 	}
 }
 
-void mc_call(
-	TOptionValue * d_s,
-	float T,
-	float K,
-	float S0,
-	float r,
-	float dt,
-	real * d_normals,
-	const real MuByT,
-	const real VBySqrtT,
-	unsigned N_STEPS,
-	size_t N_PATHS,
-	real mu,
-	real V) {
+void mc_call(TOptionValue * d_s, float T, float K, float S0, float r,
+	float dt, real * d_normals, const real MuByT, const real VBySqrtT,
+	unsigned N_STEPS, size_t N_PATHS, real mu, real V)
+{
 	const unsigned BLOCK_SIZE = 1024;
 	const unsigned GRID_SIZE = ceil(float(N_PATHS) / float(BLOCK_SIZE));
 	mc_kernel << <GRID_SIZE, BLOCK_SIZE >> >(

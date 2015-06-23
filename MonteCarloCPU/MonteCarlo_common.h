@@ -35,6 +35,8 @@ typedef struct
 	float putExpected;
     float callConfidence;
 	float putConfidence;
+	float call_stdDev;
+	float put_stdDev;
 } TOptionValue;
 
 //GPU outputs before CPU postprocessing

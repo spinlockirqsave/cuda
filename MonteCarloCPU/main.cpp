@@ -158,6 +158,8 @@ DWORD WINAPI thread_f(LPVOID lpParam)
 	partial_outcomes[pData->thread_id].putExpected = pData->optionValue.putExpected;
 	partial_outcomes[pData->thread_id].callConfidence = pData->optionValue.callConfidence;
 	partial_outcomes[pData->thread_id].putConfidence = pData->optionValue.putConfidence;
+	partial_outcomes[pData->thread_id].call_stdDev = pData->optionValue.call_stdDev;
+	partial_outcomes[pData->thread_id].put_stdDev = pData->optionValue.put_stdDev;
 	return 0;
 }
 
@@ -237,8 +239,8 @@ int main(int argc, char **argv)
 	TOptionValue optionValue = {};
 	sumDelta = 0;
 	sumRef = 0;
-	double call_price_sum = 0;
-	double put_price_sum = 0;
+	double call_price_sum = 0.0, put_price_sum = 0;
+	double call_conf_sum = 0.0,  put_conf_sum = 0.0;
 
 	for (int i = 0; i < OPT_N; i++)
 	{
@@ -304,36 +306,49 @@ int main(int argc, char **argv)
 			call_expected += partial_outcomes[k].callExpected;
 		}
 		call_expected /= MAX_THREADS;
-		double call_conf = 0.0;
+		double call_stdDev = 0.0, call_conf = 0.0;
 		for (int k = 0; k < MAX_THREADS; k++)
 		{
-			call_conf += partial_outcomes[k].callConfidence;
+			call_stdDev += partial_outcomes[k].call_stdDev;
 		}
-		call_conf /= MAX_THREADS;
+		call_stdDev /= MAX_THREADS;
+		// confidence estimation for the average
+		// std deviation of the average price
+		call_stdDev = call_stdDev / sqrt(MAX_THREADS);
+		// half of the 0.95 confidence interval
+		call_conf = (float)(exp(-optionData[0].R * optionData[0].T) * 1.96 * call_stdDev / sqrt((double)PATH_N / MAX_THREADS));
 		double put_expected = 0.0;
 		for (int k = 0; k < MAX_THREADS; k++)
 		{
 			put_expected += partial_outcomes[k].putExpected;
 		}
 		put_expected /= MAX_THREADS;
-		double put_conf = 0.0;
+		double put_stdDev = 0.0, put_conf = 0.0;
 		for (int k = 0; k < MAX_THREADS; k++)
 		{
-			put_conf += partial_outcomes[k].putConfidence;
+			put_stdDev += partial_outcomes[k].put_stdDev;
 		}
-		put_conf /= MAX_THREADS;
+		put_stdDev /= MAX_THREADS;
+		// confidence estimation for the average
+		// std deviation of the average price
+		put_stdDev = put_stdDev / sqrt(MAX_THREADS);
+		// half of the 0.95 confidence interval
+		put_conf = (float)(exp(-optionData[0].R * optionData[0].T) * 1.96 * put_stdDev / sqrt((double)PATH_N / MAX_THREADS));
 
 		printf("\n[%d] Done.\n", i + 1);
-		printf("[%d] Call expected : %f\t", i + 1, call_expected);
-		printf("Call confidence width: %f [1 - alpha = 0.95]\n", call_conf);
-		printf("[%d] Put expected  : %f\t", i + 1, put_expected);
-		printf("Put confidence width : %f [1 - alpha = 0.95]\n", put_conf);
+		printf("[%d] Call expected : %.4f\t", i + 1, call_expected);
+		printf("Call confidence width: %.4f [1 - alpha = 0.95]\n", call_conf);
+		printf("[%d] Put expected  : %.4f\t", i + 1, put_expected);
+		printf("Put confidence width : %.4f [1 - alpha = 0.95]\n", put_conf);
 		call_price_sum += call_expected;
-		put_price_sum += put_expected;
+		put_price_sum  += put_expected;
+		call_conf_sum  += call_conf;
+		put_conf_sum   += put_conf;
 	}
 	t = sdkGetTimerValue(&hTimer[0]);
-	printf("All done.\nAverage price : \tCall [%f], \tPut [%f]\n\n", call_price_sum / OPT_N, put_price_sum / OPT_N);
-	printf("Total time (ms.): %f\n", t);
+	printf("All done.\nAverage price : \tCall [%.4f], \tPut [%.4f]\n", call_price_sum / OPT_N, put_price_sum / OPT_N);
+	printf("Average confidence: \tCall [%.4f], \tPut [%.4f]\n\n", call_conf_sum / OPT_N, put_conf_sum / OPT_N);
+	printf("Total time (ms.): %.2f\n", t);
 	//printf("L1 norm: %E\n", sumDelta / sumRef);
 #endif
 

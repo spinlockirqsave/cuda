@@ -157,11 +157,13 @@ extern "C" void MonteCarloCPU(
 	optionValue.callExpected = (float)(exp(-R * T) * call_sum / (double)pathN);
 	//Standard deviation
 	double call_stdDev = sqrt(((double)pathN * call_sum2 - call_sum * call_sum) / ((double)pathN * (double)(pathN - 1)));
+	optionValue.call_stdDev = call_stdDev;
 	//Confidence width; in 95% of all cases theoretical value lies within these borders
 	optionValue.callConfidence = (float)(exp(-R * T) * 1.96 * call_stdDev / sqrt((double)pathN));
 
 	optionValue.putExpected = (float)(exp(-R * T) * put_sum / (double)pathN);
 	double put_stdDev = sqrt(((double)pathN * put_sum2 - put_sum * put_sum) / ((double)pathN * (double)(pathN - 1)));
+	optionValue.put_stdDev = put_stdDev;
 	optionValue.putConfidence = (float)(exp(-R * T) * 1.96 * put_stdDev / sqrt((double)pathN));
 
 	checkCudaErrors(curandDestroyGenerator(gen));

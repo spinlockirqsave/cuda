@@ -124,10 +124,10 @@ int main(int argc, char **argv) {
 			t5 = t4;
 			double ticks = t4;
 			printf("[%d]Done.\n", i + 1);
-			printf("[%d] Call expected : %f\t", i + 1, call_price);
-			printf("Call confidence width: %f [1 - alpha = 0.95]\n", call_conf);
-			printf("[%d] Put expected  : %f\t", i + 1, put_price);
-			printf("Put confidence width : %f [1 - alpha = 0.95]\n", put_conf);
+			printf("[%d] Call expected : %.4f\t", i + 1, call_price);
+			printf("Call confidence width: %.4f [1 - alpha = 0.95]\n", call_conf);
+			printf("[%d] Put expected  : %.4f\t", i + 1, put_price);
+			printf("Put confidence width : %.4f [1 - alpha = 0.95]\n", put_conf);
 
 			if (DO_CPU)
 			{
@@ -180,10 +180,10 @@ int main(int argc, char **argv) {
 				t5 = double(clock()) / CLOCKS_PER_SEC;
 
 				printf("\n[%d] Done.\n", i + 1);
-				printf("[%d] Call expected : %f\t", i + 1, call_price_cpu);
-				printf("Call confidence width: %f [1 - alpha = 0.95]\n", call_conf_cpu);
-				printf("[%d] Put expected  : %f\t", i + 1, put_price_cpu);
-				printf("Put confidence width : %f [1 - alpha = 0.95]\n", put_conf_cpu);
+				printf("[%d] Call expected : %.4f\t", i + 1, call_price_cpu);
+				printf("Call confidence width: %.4f [1 - alpha = 0.95]\n", call_conf_cpu);
+				printf("[%d] Put expected  : %.4f\t", i + 1, put_price_cpu);
+				printf("Put confidence width : %.4f [1 - alpha = 0.95]\n", put_conf_cpu);
 
 				call_price_cpu_sum += call_price_cpu;
 				put_price_cpu_sum += put_price_cpu;
@@ -208,15 +208,15 @@ int main(int argc, char **argv) {
 			printf("CPU time: [%6.f] ms", (t5 - t4)*1e3); printf("\t[%4.2f %%]\n", 100 * (t5 - t4) / (t5 - t2));
 		}
 		printf("Average price :\n");
-		printf( "Call price (GPU): %f", call_price_sum / OPT_N);      printf("\tCall confidence width: %f [1 - alpha = 0.95]\n", call_conf_sum / OPT_N);
+		printf( "Call price (GPU): %.4f", call_price_sum / OPT_N);      printf("\tCall confidence width: %.4f [1 - alpha = 0.95]\n", call_conf_sum / OPT_N);
 		if (DO_CPU)
 		{
-			printf("Call price (CPU): %f", call_price_cpu_sum / OPT_N); printf("\tCall confidence width: %f [1 - alpha = 0.95]\n", call_conf_sum_cpu / OPT_N);
+			printf("Call price (CPU): %.4f", call_price_cpu_sum / OPT_N); printf("\tCall confidence width: %.4f [1 - alpha = 0.95]\n", call_conf_sum_cpu / OPT_N);
 		}
-		printf( "Put price (GPU) : %f", put_price_sum / OPT_N);       printf("\tPut confidence width : %f [1 - alpha = 0.95]\n", put_conf_sum / OPT_N);
+		printf( "Put price (GPU) : %.4f", put_price_sum / OPT_N);       printf("\tPut confidence width : %.4f [1 - alpha = 0.95]\n", put_conf_sum / OPT_N);
 		if (DO_CPU)
 		{
-			printf("Put price (CPU) : %f", put_price_cpu_sum / OPT_N);   printf("\tPut confidence width : %f [1 - alpha = 0.95]\n", put_conf_sum_cpu / OPT_N);
+			printf("Put price (CPU) : %.4f", put_price_cpu_sum / OPT_N);   printf("\tPut confidence width : %.4f [1 - alpha = 0.95]\n", put_conf_sum_cpu / OPT_N);
 		}
 	}
 	catch (exception& e) {
