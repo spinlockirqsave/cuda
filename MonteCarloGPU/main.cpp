@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 			t2 = double(clock()) / CLOCKS_PER_SEC;
 
 			// call the kernel
-			mc_dao_call(d_payoffs.getData(), T, K, S0, r, dt, d_normals.getData(), MuByT, VBySqrtT, N_STEPS, N_PATHS, mu, sigma);
+			mc_call(d_payoffs.getData(), T, K, S0, r, dt, d_normals.getData(), MuByT, VBySqrtT, N_STEPS, N_PATHS, mu, sigma);
 			cudaDeviceSynchronize();
 
 			// copy results from device to host
